@@ -31,8 +31,8 @@ The `post()` method automatically wraps the provided data inside `{ "value": {} 
 
 ```python
 key = await orm.post({
-    "name": "Velikiq",
-    "surname": "Nepovtorimiq"
+    "name": "Deyan",
+    "surname": "Sirakov"
 })
 print("Generated Key:", key)
 ```
@@ -42,6 +42,13 @@ Retrieve data using its unique key.
 ```python
 result = await orm.get(key)
 print("Found Data:", result)
+```
+
+### Update Data
+Update a record by its key and new value.
+```python
+await orm.update(key, {"message", "this would be updated"})
+print(f"Updated data: {key}")
 ```
 
 ### DELETE Data
@@ -64,6 +71,9 @@ async def main():
 
     data = await orm.get(key)
     print("Found Data:", data)
+
+    updated_data = await orm.update(key, { "new_value": "updated" })
+    print("Updated Data:", updated_data)
 
     await orm.delete(key)
     print("Entry Deleted.")

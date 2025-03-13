@@ -14,6 +14,10 @@ async def main():
         data = await orm.get(key)
         print("Found:", data)
 
+        data = await orm.update(key, {"name": "Deyan"})
+        data = await orm.get(key)
+        print("Found:", data)
+        
         await orm.delete(key)
         deleted_data = await orm.get(key)
         print("After Delete:", deleted_data)
