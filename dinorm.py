@@ -11,6 +11,9 @@ class DinORM:
             print(message)
 
     async def post(self, data: dict) -> str | None:
+        """
+        Returns the key
+        """
         payload = {"value": data}  # Auto-wrap the data
         async with httpx.AsyncClient() as client:
             try:
@@ -51,7 +54,7 @@ class DinORM:
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(f"{self.base_url}/data/get/{key}")
-                return response.json()
+                return response.json()["value"]
             except httpx.HTTPStatusError as e:
                 self._log(f"HTTP error: {e}")
             except httpx.RequestError as e:

@@ -22,5 +22,6 @@ async def main():
         deleted_data = await orm.get(key)
         print("After Delete:", deleted_data)
 
+
 if __name__ == "__main__":
     asyncio.run(main())
