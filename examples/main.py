@@ -1,5 +1,5 @@
 import asyncio
-from dinorm import DinORM
+from ..dinorm import DinORM
 
 async def main():
     repository = DinORM("http://localhost", 8000, debug=True)
