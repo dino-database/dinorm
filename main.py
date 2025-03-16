@@ -2,26 +2,35 @@ import asyncio
 from dinorm import DinORM
 
 async def main():
-    orm = DinORM("http://localhost", 8000, debug=True)
+    repository = DinORM("http://localhost", 8000, debug=True)
 
-    key = await orm.post({
-        "name": "Velikiq",
-        "surname": "Nepovtorimiq"
+    key = await repository.post({
+        "name": "Deyan",
+        "surname": "Sirakov"
     })
     print("Generated Key:", key)
 
     if key:
-        data = await orm.get(key)
+        data = await repository.get(key)
         print("Found:", data)
 
-        data = await orm.update(key, {"name": "Deyan"})
-        data = await orm.get(key)
+        data = await repository.update(key, {"name": "Deyan"})
+        data = await repository.get(key)
         print("Found:", data)
         
-        await orm.delete(key)
-        deleted_data = await orm.get(key)
+        await repository.delete(key)
+        deleted_data = await repository.get(key)
         print("After Delete:", deleted_data)
 
 
+async def test():
+    repository = DinORM("http://localhost", port=8000, debug=False)
+
+    resp = await repository.update("01c08731-3860-4ca9-b1d8-bf85f13c131c", { "changed": "true" })
+    print("Response: ", resp)
+
+    data = await repository.get("01c08731-3860-4ca9-b1d8-bf85f13c131c")
+    print("Data: ", data)
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(test())
