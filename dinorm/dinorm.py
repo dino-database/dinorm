@@ -1,4 +1,5 @@
 import httpx
+import json
 
 class DinORM:
     """
@@ -18,6 +19,19 @@ class DinORM:
         """
         self.base_url = f"{url}:{port}"
         self.debug = debug
+        
+    def _is_json(text: str):
+        """
+        Checks if string is a valid JSON.
+        
+        Args:
+            text (str): The text to check.
+        """
+        try:
+            json.loads(text)
+        except ValueError as e:
+            return False
+        return True
 
     def _log(self, message: str):
         """
@@ -56,7 +70,7 @@ class DinORM:
                 self._log(f"Request error: {e}")
             return None
 
-    async def update(self, key: str, data: dict) -> bool:
+    async def update_by_id(self, key: str, data: dict) -> bool:
         """
         Sends a PATCH request to update data associated with a given key.
 
@@ -84,7 +98,7 @@ class DinORM:
                 self._log(f"Request error: {e}")
             return False
 
-    async def get(self, key: str) -> dict | None:
+    async def find_by_id(self, key: str) -> dict | None:
         """
         Sends a GET request to retrieve data associated with a given key.
 
@@ -103,8 +117,74 @@ class DinORM:
             except httpx.RequestError as e:
                 self._log(f"Request error: {e}")
             return None
-
-    async def delete(self, key: str) -> bool:
+        
+    async def find(self, query: dict) -> list[dict]:
+        """
+        Sends a GET request with query parameters to retrieve multiple records.
+        
+        Args:
+            query (dict): query conditions to retrieve data.
+            
+        Returns:
+            list[dict]: List of matching records.
+        """
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(f"{self.base_url}/data/find", params=query)
+                response.raise_for_status()
+                data = response.json().get("results", [])
+                
+                self._log(f"Find Response code: {response.status_code}")
+                self._log(f"Find Response: {data}")
+                
+                return data
+            except httpx.HTTPStatusError as e:
+                self._log(f"HTTP error: {e}")
+            except httpx.RequestError as e:
+                self._log(f"Request error: {e}")
+            return []
+        
+    async def find_one(self, query: dict) -> dict | None:
+        """
+        Retrieves a single record matching the given query conditions.
+        
+        Args:
+            query (dict): query conditions to retrieve data.
+        
+        Returns:
+            dict | None: The matching record or None if not found.
+        """
+        results = await self.find(query)
+        return results[0] if results else None
+    
+    async def aggregate(self, pipeline: list[dict]) -> list[dict]:
+        """
+        Sends a POST request for complex aggregation operations,
+        
+        Args:
+            pipeline (list[dict]): Aggregation pipeline
+        
+        Returns:
+            list[dict]: Aggregated data results.
+        """
+        payload = { "pipeline": pipeline }
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(f"{self.base_url}/data/aggregate", json=payload)
+                response.raise_for_status()
+                data = response.json().get("results", [])
+                
+                self._log(f"Aggregate Response code: {response.status_code}")
+                self._log(f"Aggregate Response: {data}")
+                
+                return data
+            except httpx.HTTPStatusError as e:
+                self._log(f"HTTP error: {e}")
+            except httpx.RequestError as e:
+                self._log(f"Request error: {e}")
+            return []
+        
+    async def delete_by_id(self, key: str) -> bool:
         """
         Sends a DELETE request to remove data associated with a given key.
 
